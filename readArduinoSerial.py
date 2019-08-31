@@ -71,7 +71,7 @@ def listenSensorData(sensorObj):
 sensor1 = SensorData()
 
 
-def start_serial_communication_thing():
+def start_serial_communication_thread():
     arduino_thread = threading.Thread(target=listenSensorData, args=(sensor1,))
     arduino_thread.start()
 

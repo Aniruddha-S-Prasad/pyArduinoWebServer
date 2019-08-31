@@ -25,7 +25,7 @@ def password_chk():
 
 
 def start_flask_server():
-    app.run(host='0.0.0.0', port='8080')
+    app.run(host='0.0.0.0', port='80')
 
 
 def start_server_thread():
