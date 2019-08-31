@@ -14,7 +14,7 @@ def hello_world():
 
 @app.route('/data')
 def get_data():
-    return jsonify(sensor1)
+    return jsonify(sensor1.__dict__)
 
 
 @app.route('/login')
