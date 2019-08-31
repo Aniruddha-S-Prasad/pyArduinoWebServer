@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+</head>
+<body>
+<div id="clock"></div>
+<div id="data"></div>
+ <script>
+        const dataEl = document.querySelector("#data");
+        function fetchAndRender() {
+          fetch("/data")
+            .then(response => response.json())
+            .then(data => {
+              dataEl.innerText = JSON.stringify(data);
+            });
+        }
+        setInterval(fetchAndRender, 5000);
+
+        const clockEl = document.querySelector("#clock");
+        function clocker() {
+          clockEl.innerText = new Date();
+        }
+        setInterval(clocker, 1000);
+</script>
+</body>
+</html>
