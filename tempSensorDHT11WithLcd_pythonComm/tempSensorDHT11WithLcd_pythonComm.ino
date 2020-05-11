@@ -25,8 +25,8 @@ volatile byte readFlag = 0;
 volatile byte htIdxFlg = 0;
 volatile int BL_state = 0;
 
-unsigned int pollTime = 2;
-unsigned int pollTime_1 = 1; 
+unsigned int pollTime = 5;
+unsigned int pollTime_1 = 2; 
 unsigned int pollTimeMs = pollTime*1000;
 unsigned int pollTimeMs_1 = pollTime_1*1000;
 
@@ -38,6 +38,16 @@ unsigned int pollTimeMs_1 = pollTime_1*1000;
 #define BLCtrlPin 2
 DHT dht(DHTPIN, DHTTYPE);
 float hmdty, tempCel, htIdx;
+
+
+void send_dataJson(float temperature, float humidity){
+  Serial.print("{\"Temperature\": ");
+  Serial.print(temperature);
+  Serial.print(",\"Humidity\": ");
+  Serial.print(humidity);
+  Serial.print("}\n");
+}
+
 
 void setup() {
   // Setup Timer
@@ -83,10 +93,9 @@ void loop() {
     lcd.print("Hmdty: ");
     lcd.print(hmdty);
     lcd.print("%");
-    Serial.print("H,");
-    Serial.print(hmdty);
-    Serial.print(",T,");
-    Serial.println(tempCel);
+
+    //Print function here
+    send_dataJson(tempCel, hmdty);
   }
   if(htIdxFlg == 1){
     htIdxFlg = 0;

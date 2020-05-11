@@ -1,5 +1,6 @@
 import sys
 import glob
+import json
 import threading
 
 import serial
@@ -7,8 +8,7 @@ import serial
 
 class SensorData:
     def __str__(self) -> str:
-        tempStr = 'Temperature: ' + str(self.temperature) + ' Humidity: ' + str(self.humidity)
-        return tempStr
+        return 'Temperature: ' + str(self.temperature) + ' Humidity: ' + str(self.humidity)
 
     def __init__(self, temperature=0.0, humidity=0.0):
         self.temperature = temperature
@@ -56,13 +56,10 @@ def listenSensorData(sensorObj):
     while True:
         try:
             arduinoStringRaw = arduinoSerialDevice.readline().decode('utf-8')
-            arduinoString = arduinoStringRaw.split(',')
-            for i in range(len(arduinoString)):
-                if arduinoString[i] == 'H':
-                    sensorObj.humidity = float(arduinoString[i + 1])
-                elif arduinoString[i] == 'T':
-                    sensorObj.temperature = float(arduinoString[i + 1])
-            print('Temperature: ' + str(sensorObj.temperature) + ' Humidity: ' + str(sensorObj.humidity))
+            arduino_data = json.loads(arduinoStringRaw)
+            sensorObj.temperature = arduino_data['Temperature']
+            sensorObj.humidity = arduino_data['Humidity']
+            print(sensorObj)
         except KeyboardInterrupt:
             print('Exiting ... ')
             sys.exit(0)
