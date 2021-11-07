@@ -50,7 +50,7 @@ def listenSensorData(sensorObj):
         sys.exit('No Serial Ports found. Exiting')
 
     print(serialPorts)
-    arduinoSerialDevice = serial.Serial(serialPorts[0], 9600)
+    arduinoSerialDevice = serial.Serial(serialPorts[0], 115200)
     arduinoString = 'Error, No Data'
 
     while True:

@@ -1,4 +1,4 @@
-import sys, time
+import sys, time, glob
 import json, csv
 import serial
 
@@ -15,6 +15,9 @@ def listSerialPorts() -> list:
 	"""
 	if sys.platform.startswith('win'):
 		ports = ['COM%s' % (i + 1) for i in range(256)]
+	elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+		# this excludes your current terminal "/dev/tty"
+		ports = glob.glob('/dev/tty[A-Za-z]*')
 	else:
 		raise EnvironmentError('Unsupported platform')
 
@@ -40,7 +43,7 @@ def logSensorData():
 	selection = int(input('Please select the COM port corresponding to the attached microcontroller device. (Eg: 1, 2, 3 etc)\n'))
 
 
-	serial_device = serial.Serial(serial_ports[selection], 9600)
+	serial_device = serial.Serial(serial_ports[selection], 115200)
 	arduino_data = {}
 	arduino_data_keys = ['Timestamp', 'Temperature', 'Humidity', 'HeatIndex']
 	counter = 0
@@ -57,19 +60,23 @@ def logSensorData():
 
 				try:
 					arduino_data = json.loads(raw_received_string)
+					arduino_data['Timestamp'] = int(time.time())
+					data_writer.writerow(arduino_data)
 				except json.JSONDecodeError:
 					print(f'JSON Error at {current_time_string}, probably a serial communication error')
 					continue
 				
-				arduino_data['Timestamp'] = int(time.time())
-				data_writer.writerow(arduino_data)
-				
 				print(f'At {current_time_string}, the temperature was {arduino_data["Temperature"]} and the humudity was {arduino_data["Humidity"]}')
+				
+				counter += 1
+				if counter % 100 == 0:
+					data_file.flush()
+
 			except KeyboardInterrupt:
 				break
 		
 	print('Exiting ... ')
-	sys.exit(0)
+	return
 
 
 if __name__ == "__main__":

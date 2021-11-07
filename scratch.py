@@ -1,35 +1,47 @@
 import time
-import sqlite3
+import csv
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdate
+from matplotlib import pyplot as plt
+from matplotlib import dates as mdate
 
 def main():
-    db_con = sqlite3.connect('databases/weather_data.db')
-    db_cur = db_con.cursor()
-    db_cur.execute('SELECT Temperature, Humidity FROM data')
-    data = np.array(db_cur.fetchall())
-    db_cur.execute('SELECT Timestamp FROM data')
-    timestamps = np.array(db_cur.fetchall())
-    timestamps += 3600 + 3600
-    db_con.close()
+    timestamps = []
+    temperature = []
+    humidity = []
+    heat_index = []
 
-    mplTimestamps = mdate.epoch2num(timestamps)
-    fig, (ax1, ax2) = plt.subplots(1, 2)
+    with open('databases/room_climate_2021-11-02_21h42m46s.csv', 'r') as saved_data:
+        data_reader = csv.DictReader(saved_data)
+        for row in data_reader:
+            timestamps.append(int(row['Timestamp']))
+            temperature.append(float(row['Temperature']))
+            humidity.append(float(row['Humidity']))
+            heat_index.append(float(row['HeatIndex']))
 
-    ax1.plot_date(mplTimestamps, data[:, 0], '-')
+    timestamps = np.array(timestamps[0:42000])
+    temperature = np.array(temperature[0:42000])
+    humidity = np.array(humidity[0:42000])
+    heat_index = np.array(heat_index[0:42000])
+
+    factor = 600
+    timestamps = np.mean(timestamps.reshape(-1, factor), axis=1)
+    temperature = np.mean(temperature.reshape(-1, factor), axis=1)
+    humidity = np.mean(humidity.reshape(-1, factor), axis=1)
+    heat_index = np.mean(heat_index.reshape(-1, factor), axis=1)
+
+    mpl_timestamps = mdate.epoch2num(timestamps)
+    
+    fig, ax = plt.subplots()
+    ax.plot_date(mpl_timestamps, temperature, '-b', label='Temperature')
+    ax.plot_date(mpl_timestamps, heat_index, '-r', label='Heat Index')
+    ax.set_ylim((15, 30))    
     date_format = '%H:%M:%S'
     date_formatter = mdate.DateFormatter(date_format)
-    ax1.xaxis.set_major_formatter(date_formatter)
-    ax1.set_ylim([10.0, 30.0])
-
-    ax2.plot_date(mplTimestamps, data[:, 1], '-')
-    ax2.xaxis.set_major_formatter(date_formatter)
-    ax2.set_ylim([20, 60])
-
+    ax.xaxis.set_major_formatter(date_formatter)
     fig.autofmt_xdate()
-    ax1.grid(True)
-    ax2.grid(True)
+
+    plt.legend()
+    plt.grid()
     plt.show()
 
 if __name__ == "__main__":
