@@ -1,6 +1,7 @@
 import threading
 
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify, render_template, send_file
+from flask.helpers import send_file
 
 from readArduinoSerial import SensorData, sensor1
 
@@ -9,7 +10,11 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return send_file('index.html')
+    return render_template('index.html')
+
+@app.route('/charts')
+def render_charts():
+    return render_template('chart.html')
 
 
 @app.route('/data')
