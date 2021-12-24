@@ -81,8 +81,10 @@ def logSensorData():
 			raise RuntimeError('How is this even possible?!, current day is before start day?')
 
 		try:
+			weather_data_keys = ['Temperature', 'Humidity', 'HeatIndex', 'Timestamp']
+			weather_dataframe = pd.DataFrame(columns=weather_data_keys)
 			weather_data = []
-			for ctr in range(40):
+			for ctr in range(5):
 
 					serial_device.flushInput()
 					raw_received_string = serial_device.readline().decode('utf-8')
@@ -97,8 +99,8 @@ def logSensorData():
 						continue
 					
 					print(f'At {current_time_string}, the temperature was {weather_datapoint["Temperature"]} and the humudity was {weather_datapoint["Humidity"]}')
-					time.sleep(15)
-					
+					# time.sleep(15)
+					 
 			weather_dataframe = pd.DataFrame(weather_data)
 			weather_dataframe.to_csv(database_filename, mode='a', header=False, index=False)
 			
