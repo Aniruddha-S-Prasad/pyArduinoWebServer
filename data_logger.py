@@ -31,16 +31,25 @@ def listSerialPorts() -> list:
 			pass
 	return result
 
-def create_new_database_file() -> str:
-	file_date_string = time.strftime('%Y-%m-%d', time.localtime())
-	database_filename = 'databases/room_weather_' + file_date_string + '.csv'
 
-	if not os.path.isfile(database_filename):
-		with open(database_filename, 'w'):
-			pass
-		print('Created new file on ' + file_date_string)
-	
+def create_new_database_filename() -> str:
+	file_date_string = time.strftime('%Y-%m-%d', time.localtime())
+	database_filename = 'databases/room_weather_' + file_date_string + '.csv'	
 	return database_filename
+
+
+def save_data(weather_data: list, database_filename: str):
+	file_date_string = time.strftime('%Y-%m-%d', time.localtime())
+
+	weather_dataframe = pd.DataFrame(weather_data)	
+	if not os.path.isfile(database_filename):
+		weather_dataframe.to_csv(database_filename, mode='w', header=True, index=False)
+		print('Created new file on ' + file_date_string)
+	else:
+		weather_dataframe.to_csv(database_filename, mode='a', header=False, index=False)
+	
+	weather_dataframe.drop(weather_dataframe.index, inplace=True)
+	return
 
 
 def logSensorData():
@@ -59,7 +68,7 @@ def logSensorData():
 	selection = int(input('Please select the serial port corresponding to the attached microcontroller device. (Eg: 1, 2, 3 etc)\n'))
 
 	serial_device = serial.Serial(serial_ports[selection], 115200)
-	database_filename = create_new_database_file()	
+	database_filename = create_new_database_filename()	
 
 	while True:
 		current_day = date.today()
@@ -67,7 +76,7 @@ def logSensorData():
 		if current_day == previous_day:
 			pass
 		elif (current_day - previous_day) == timedelta(days=1):
-			database_filename = create_new_database_file()
+			database_filename = create_new_database_filename()
 			previous_day = date.today()
 
 		elif (current_day - previous_day) > timedelta(days=1):
@@ -77,8 +86,6 @@ def logSensorData():
 			raise RuntimeError('How is this even possible?!, current day is before start day?')
 
 		try:
-			weather_data_keys = ['Temperature', 'Humidity', 'HeatIndex', 'Timestamp']
-			weather_dataframe = pd.DataFrame(columns=weather_data_keys)
 			weather_data = []
 			for ctr in range(5):
 
@@ -96,20 +103,9 @@ def logSensorData():
 					
 					print(f'At {current_time_string}, the temperature was {weather_datapoint["Temperature"]} and the humudity was {weather_datapoint["Humidity"]}')
 					# time.sleep(15)
-
-			weather_dataframe = pd.DataFrame(weather_data)	
-			if os.stat(database_filename).st_size == 0:
-				weather_dataframe.to_csv(database_filename, mode='w', header=True, index=False)
-			else:
-				weather_dataframe.to_csv(database_filename, mode='a', header=False, index=False)
-			
-			weather_dataframe.drop(weather_dataframe.index, inplace=True)
+			save_data(weather_data, database_filename)
 		except KeyboardInterrupt:
-			weather_dataframe = pd.DataFrame(weather_data)
-			if os.stat(database_filename).st_size == 0:
-				weather_dataframe.to_csv(database_filename, mode='w', header=True, index=False)
-			else:
-				weather_dataframe.to_csv(database_filename, mode='a', header=False, index=False)
+			save_data(weather_data, database_filename)
 			break
 		
 	print('Exiting ... ')
