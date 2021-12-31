@@ -87,7 +87,7 @@ def logSensorData():
 
 		try:
 			weather_data = []
-			for ctr in range(5):
+			for ctr in range(40):
 
 					serial_device.flushInput()
 					raw_received_string = serial_device.readline().decode('utf-8')
@@ -102,7 +102,7 @@ def logSensorData():
 						continue
 					
 					print(f'At {current_time_string}, the temperature was {weather_datapoint["Temperature"]} and the humudity was {weather_datapoint["Humidity"]}')
-					# time.sleep(15)
+					time.sleep(15)
 			save_data(weather_data, database_filename)
 		except KeyboardInterrupt:
 			save_data(weather_data, database_filename)

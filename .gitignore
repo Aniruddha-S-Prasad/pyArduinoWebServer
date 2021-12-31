@@ -1,6 +1,8 @@
-.venv
-.vscode
-.idea
-databases
-__pycache__
-linuxVenv
+.venv/
+.vscode/
+.idea/
+venv/
+databases/
+__pycache__/
+linuxVenv/
+imported_databases/
